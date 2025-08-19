@@ -1,19 +1,21 @@
-# ADX JSON Logs Ingestor
+# JSON Logs to ADX Ingester
 
-This repository contains a lightweight setup to run Python scripts that ingest JSON data into Azure Data Explorer (ADX). It 
-also includes Docker tooling to keep a ready-to-run container alive while you execute scripts via docker compose exec, 
-plus convenience wrappers (x-*.sh) for common tasks.
+This repository contains a lightweight setup to ingest JSON logs into Azure Data Explorer (ADX) using Python scripts. It 
+also includes a Docker Compose setup to execute the scripts fully from inside a container.
 
-Important: The README documents both native (Python venv) usage and Docker-based usage, and calls out all available x-*.sh 
-wrappers.
+Important: The README documents both native (Python venv) usage and Docker-based usage.
+
+**In a rush?** Jump to [Ingestion Patterns](#ingestion-patterns).
 
 ## What’s here
+
 - Dockerfile based on `ericwastakenondocker/network-multitool` that pre-installs Python deps from `scripts/requirements.txt`.
 - docker-compose.yml that mounts `./scripts` into the container at `/scripts` and exposes a tiny HTTP server (from the base image) to keep the container running.
-- Python scripts under `./scripts` (e.g., `ingest_inline.py`) that talk to ADX.
-- Convenience shell wrappers in the repo root (`x-*.sh`) for common Docker workflows.
+- Python scripts under `./scripts` (e.g., `ingest_inline.py`) that talk to ADX. Scripts can be run natively or via Docker.
+- Convenience shell wrappers (`x-*.sh`) for common Docker workflows.
 
-## Script wrappers (x-*.sh)
+### Script wrappers
+
 These wrappers simplify common docker compose operations.
 - Service name in compose: `adx-ingester`
 - Container name: `adx-ingester`
@@ -30,49 +32,9 @@ Docker Wrappers:
 
 Note: Some wrappers expect docker, compose, and optionally buildx. Ensure you’re logged into Docker for push operations.
 
----
-
-## Running scripts natively inside a Python venv
-Use this if you prefer not to use Docker. Note, this requires Python 3.12+ and the Azure CLI.
-
-1) Create and activate a venv
-
-- macOS/Linux:
-  ```bash
-  python3 -m venv .venv
-  source .venv/bin/activate
-  ```
-
-2) Install requirements
-
-- Upgrade pip and install:
-  ```bash
-  pip install --upgrade pip
-  pip install -r scripts/requirements.txt
-  ```
-
-3) Ensure Azure CLI is available (for ingest_inline.py)
-
-- This repo’s `scripts/utils/adx_cli_auth.py` acquires tokens via the Azure CLI (`az`).
-- Azure sign in: `az login`
-
-4) Run a helper script
-
-- Show help: `python scripts/ingest_inline.py --help`
-
-- Example (replace placeholders):
-  ```bash
-  python scripts/ingest_inline.py \
-    --cluster-host "<your-cluster-host>.kusto.windows.net" \
-    --db "<DB>" \
-    --table "<Table>" \
-    --mapping "<MappingName>" \
-    --json '{"hello":"world"}'
-  ```
----
-
-## Running scripts via docker compose exec
-This is the recommended approach for a consistent environment. The container remains alive via the base image’s web server and mounts `./scripts` at `/scripts`.
+## Running scripts via docker compose
+This is the recommended approach for a consistent environment. The container remains alive via the base image’s web 
+server and mounts `./scripts` at `/scripts`.
 
 1) Build and start the container
 - Using wrappers: `./x-up.sh` start (build if needed) or `./x-force-build-and-up.sh` force rebuild and start
@@ -86,7 +48,7 @@ Optional: Verify it’s up: `curl -f http://localhost:8080/ && echo OK`
   docker compose exec -i adx-ingester python3 ingest_inline.py --help
   ```
 
-- Example (replace placeholders):
+- Example:
   ```bash
   docker compose exec adx-ingester \
     python3 ingest_inline.py \
@@ -125,11 +87,50 @@ Optional: Verify it’s up: `curl -f http://localhost:8080/ && echo OK`
 5) Optional: Docker socket
 - If any script needs to interact with Docker, uncomment the `/var/run/docker.sock` volume mapping in docker-compose.yml.
 
----
+## Running scripts natively inside a Python venv
 
-## INGESTION PATTERNS
+Use this if you prefer not to use Docker. Note, this requires Python 3.12+ and the Azure CLI.
 
-Below are common ways to use scripts/ingest_inline.py to send data to ADX. Replace placeholders like <your-cluster-host>, <DB>, <Table>, and <MappingName> with your values.
+1) Create and activate a venv
+
+- macOS/Linux:
+  ```bash
+  python3 -m venv .venv
+  source .venv/bin/activate
+  ```
+
+2) Install requirements
+
+- Upgrade pip and install:
+  ```bash
+  pip install --upgrade pip
+  pip install -r scripts/requirements.txt
+  ```
+
+3) Ensure Azure CLI is available (for ingest_inline.py)
+
+- This repo’s `scripts/utils/adx_cli_auth.py` acquires tokens via the Azure CLI (`az`).
+- Azure sign in: `az login`
+
+4) Run a helper script
+
+- Show help: `python scripts/ingest_inline.py --help`
+
+- Example (replace placeholders):
+  ```bash
+  python scripts/ingest_inline.py \
+    --cluster-host "<your-cluster-host>.kusto.windows.net" \
+    --db "<DB>" \
+    --table "<Table>" \
+    --mapping "<MappingName>" \
+    --json '{"hello":"world"}'
+  ```
+## Ingestion Patterns
+
+Below are common ways to use scripts/ingest_inline.py to send data to ADX. Replace placeholders like "<your-cluster-host>", 
+"<DB>", "<Table>", and "<MappingName>" with your values.
+
+**Note:** The examples below use the Docker Compose setup. However, just remove `./x-exec.sh` to run the scripts natively.
 
 1) Single JSON object (inline)
 - Sends exactly one JSON object via --json.
@@ -181,7 +182,7 @@ Arguments used in the examples
 - --ndjson: Treats the input as newline-delimited JSON (one JSON object per line) and ingests in batches.
 - --batch-size: When --ndjson is used, controls how many lines are sent per batch (default: 100).
 
-Notes
+**Notes**
 
 - The tool compacts JSON (removes whitespace) and uses a Kusto control command with format='multijson' and the provided ingestionMappingReference.
 - For --ndjson, malformed lines are skipped with warnings; a summary of sent and skipped records is printed.
