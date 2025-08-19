@@ -211,4 +211,4 @@ short term of a few hours.
 
 [UNTESTED] If you have a paid cluster, you can also setup a service principal and other methods. This flow is more suitable 
 for a longer term. In this case, you pass `AZURE_TENANT_ID=...`, `AZURE_CLIENT_ID=...`, `AZURE_CLIENT_SECRET=` to the 
-scripts via the environment variable `AZURE_ACCESS_TOKEN`.
+scripts via environment variables.
