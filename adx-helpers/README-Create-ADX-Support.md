@@ -9,13 +9,13 @@
 
 2. Create a free Azure Data Explorer Cluster:
     - Go to Azure ADX Portal (https://dataexplorer.azure.com/)
-    - Follow the steps
+    - Follow the steps to create your free cluster.
 
 3. Configure the new cluster:
     - Wait for deployment to complete
     - Go to your new cluster
     - Create a new database
-    - Use the connection string shown in "Overview"
+    - Use the cluster URI shown in "Overview"
 
 ## KQL Commands
 
