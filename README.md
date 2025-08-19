@@ -7,6 +7,10 @@ Important: The README documents both native (Python venv) usage and Docker-based
 
 **In a rush?** Jump to [Ingestion Patterns](#ingestion-patterns).
 
+> **Note:** The techique used in this repo is suitable for development and testing. It is not recommended for production 
+> (or very large log counts) because the log ingestion is not optimized for large data sets. For large data sets and 
+> high throughput, consider using an Azure Eventhub ingestion pipeline.
+
 ## What’s here
 
 - Dockerfile based on `ericwastakenondocker/network-multitool` that pre-installs Python deps from `scripts/requirements.txt`.
@@ -75,7 +79,6 @@ Optional: Verify it’s up: `curl -f http://localhost:8080/ && echo OK`
   --mapping <MappingName> \
   --json '{"timestamp":"2025-08-16T15:00:00Z","ping":"inline-ok-from-script"}'
   ```
-
 3) Environment variables
 - Option A: Put them under `environment:` in docker-compose.yml.
 - Option B: Pass at runtime:
@@ -170,6 +173,8 @@ cat ./samples/sample.ndjson | ./x-exec.sh python3 ingest_inline.py \
 - Streams recent container logs, converts lines to JSON with jq, and ingests as NDJSON.
 - Adjust docker logs options as needed (e.g., `--since`, container name).
 
+**Standard Docker**
+
 ```bash
 docker logs --since 5m --timestamps adx-ingester \
   | jq -R -c 'split(" ") as $f | {timestamp: ($f[0] | sub("\\..*Z$"; "Z")), log: ($f[1:] | join(" "))}' \
@@ -180,6 +185,21 @@ docker logs --since 5m --timestamps adx-ingester \
   --mapping <MappingName> \
   --ndjson
 ```
+
+** Docker Swarm**
+
+```bash
+docker service logs --since 5m --timestamps adx-ingester \
+  | jq -R -c 'split(" ") as $f | {timestamp: ($f[0] | sub("\\..*Z$"; "Z")), log: ($f[1:] | join(" "))}' \
+  | ./x-exec.sh python3 ingest_inline.py \
+  --cluster-host <your-cluster-host>.kusto.windows.net \
+  --db <DB> \
+  --table <Table> \
+  --mapping <MappingName> \
+  --ndjson
+```
+See [z-ingest-docker-service-logs.sh](./z-docker-ingest-service-logs.sh) for a more detailed example of how to ingest 
+Docker Swarm (Service) logs that already contain some JSON.
 
 Arguments used in the examples
 - --cluster-host: Your ADX engine host, e.g., `<your-cluster-host>.kusto.windows.net`

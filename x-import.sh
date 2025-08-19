@@ -10,7 +10,7 @@ if ! [ -x "$(command -v docker)" ]; then
 fi
 
 # detect if docker-compose is installed
-if ! [ -x "$(command -v docker-compose)" ]; then
+if ! [ -x "$(command -v docker compose)" ]; then
     echo "Docker Compose is not installed. Please install docker-compose and try again."
     exit 1
 fi
