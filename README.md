@@ -199,3 +199,14 @@ Arguments used in the examples
 - Ensure your ADX table and JSON ingestion mapping exist (or are created) and that your identity has the appropriate 
   roles (e.g., Ingestor). Refer to the directory ./adx-helpers in this repo for more information.
 
+## Azure Login
+
+[TESTED AND CONFIRMED] The scripts use the Azure CLI token flow, which is supported by the Azure ADX Free Cluster, but it generally valid for a
+short term of a few hours.
+- The ingest script will try to get a token from the environment and will attempt a login if needed. Watch the command 
+  line output for instructions to an interactive login. The interactive login will last only a few hours.
+- For quick tests, get a shell inside the container and run `az login` or other Azure CLI commands.
+
+[UNTESTED] If you have a paid cluster, you can also setup a service principal and other methods. This flow is more suitable 
+for a longer term. In this case, you pass `AZURE_TENANT_ID=...`, `AZURE_CLIENT_ID=...`, `AZURE_CLIENT_SECRET=` to the 
+scripts via the environment variable `AZURE_ACCESS_TOKEN`.
