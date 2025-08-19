@@ -201,6 +201,8 @@ Arguments used in the examples
 
 ## Azure Login
 
+The full Azure CLI is installed in the container.
+
 [TESTED AND CONFIRMED] The scripts use the Azure CLI token flow, which is supported by the Azure ADX Free Cluster, but it generally valid for a
 short term of a few hours.
 - The ingest script will try to get a token from the environment and will attempt a login if needed. Watch the command 
