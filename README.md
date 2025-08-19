@@ -34,7 +34,7 @@ Note: Some wrappers expect docker, compose, and optionally buildx. Ensure you’
 
 ## Prepare ADX and your database and table
 
-Please refer to the [Create ADX Support README](adx-helpers/README.md).
+Please refer to the [ADX Preparation README](adx-helpers/README.md).
 
 ## Running scripts via docker compose
 This is the recommended approach for a consistent environment. The container remains alive via the base image’s web 
@@ -137,7 +137,7 @@ Below are common ways to use scripts/ingest_inline.py to send data to ADX. Repla
 **Note:** The examples below use the Docker Compose setup. However, just remove `./x-exec.sh` to run the scripts natively.
 
 Before ingesting, ensure your ADX table and JSON ingestion mapping exist (or are created) and that your identity has the 
-appropriate roles (e.g., Ingestor). Refer to the [Create ADX Support README](adx-helpers/README.md) 
+appropriate roles (e.g., Ingestor). Refer to the [ADX Preparation README](adx-helpers/README.md) 
 for more information.
 
 1) Single JSON object (inline)
