@@ -1,0 +1,36 @@
+services:
+  adx-ingester:
+    # Build an image using the provided base (via Dockerfile) and pre-install Python deps
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: adx-imgester
+    container_name: adx-ingester
+
+    # Bind-mount the local scripts directory into the container
+    volumes:
+      - ./scripts:/scripts:rw
+      # Uncomment if any scripts require access to the Docker socket
+      # - /var/run/docker.sock:/var/run/docker.sock:ro
+
+    # Work from the scripts directory so relative imports (e.g., utils) work
+    working_dir: /scripts
+
+    environment:
+      - PYTHONUNBUFFERED=1
+      # Add any required env vars for your scripts here, e.g.:
+      # - AZURE_TENANT_ID=...
+      # - AZURE_CLIENT_ID=...
+      # - AZURE_CLIENT_SECRET=...
+
+    # Expose the built-in web server from network-multitool to keep the container running
+    ports:
+      - "8080:80"
+
+    # Simple healthcheck against the local web server
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1/ || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
