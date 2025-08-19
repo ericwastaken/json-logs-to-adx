@@ -131,8 +131,8 @@ Use this if you prefer not to use Docker. Note, this requires Python 3.12+ and t
   ```
 ## Ingestion Patterns
 
-Below are common ways to use scripts/ingest_inline.py to send data to ADX. Replace placeholders like "<your-cluster-host>", 
-"<DB>", "<Table>", and "<MappingName>" with your values.
+Below are common ways to use scripts/ingest_inline.py to send data to ADX. Replace placeholders like `<your-cluster-host>`, 
+`<DB>`, `<Table>`, and `<MappingName>` with your values.
 
 **Note:** The examples below use the Docker Compose setup. However, just remove `./x-exec.sh` to run the scripts natively.
 
@@ -141,7 +141,7 @@ appropriate roles (e.g., Ingestor). Refer to the [Create ADX Support README](./a
 for more information.
 
 1) Single JSON object (inline)
-- Sends exactly one JSON object via --json.
+- Sends exactly one JSON object via `--json`.
 - Useful for quick connectivity tests or inserting one record.
 
 ```bash
@@ -155,7 +155,7 @@ for more information.
 
 2) NDJSON from a file (pipe via STDIN)
 - Reads newline-delimited JSON (one object per line) from STDIN.
-- Use --ndjson so the tool batches and ingests multiple lines.
+- Use `--ndjson` so the tool batches and ingests multiple lines.
 
 ```bash
 cat ./samples/sample.ndjson | ./x-exec.sh python3 ingest_inline.py \
@@ -168,7 +168,7 @@ cat ./samples/sample.ndjson | ./x-exec.sh python3 ingest_inline.py \
 
 3) Stream Docker logs -> JSON -> NDJSON ingest (useful for scenarios where your docker logs are not in JSON format).
 - Streams recent container logs, converts lines to JSON with jq, and ingests as NDJSON.
-- Adjust docker logs options as needed (e.g., --since, container name).
+- Adjust docker logs options as needed (e.g., `--since`, container name).
 
 ```bash
 docker logs --since 5m --timestamps adx-ingester \
@@ -182,19 +182,20 @@ docker logs --since 5m --timestamps adx-ingester \
 ```
 
 Arguments used in the examples
-- --cluster-host: Your ADX engine host, e.g., <your-cluster-host>.kusto.windows.net
+- --cluster-host: Your ADX engine host, e.g., `<your-cluster-host>.kusto.windows.net`
 - --db: Target ADX database name.
 - --table: Target ADX table name. Brackets/quoting are handled in the script for names with dashes.
 - --mapping: Name of an existing JSON ingestion mapping in ADX for the target table.
 - --json: The JSON payload to ingest. If omitted or set to '-', the script reads from STDIN instead.
 - --ndjson: Treats the input as newline-delimited JSON (one JSON object per line) and ingests in batches.
-- --batch-size: When --ndjson is used, controls how many lines are sent per batch (default: 100).
+- --batch-size: When `--ndjson` is used, controls how many lines are sent per batch (default: 100).
 
 **Notes**
 
-- The tool compacts JSON (removes whitespace) and uses a Kusto control command with format='multijson' and the provided ingestionMappingReference.
-- For --ndjson, malformed lines are skipped with warnings; a summary of sent and skipped records is printed.
-- Normalize log lines (parse JSON if already in that format or otherwise wrap as {"message": "..."}).
+- The tool compacts JSON (removes whitespace) and uses a Kusto control command with `format='multijson'` and the provided ingestionMappingReference.
+- For `--ndjson`, malformed lines are skipped with warnings; a summary of sent and skipped records is printed.
+- Normalize log lines (parse JSON if already in that format or otherwise wrap as `{"message": "..."}`).
 - Extract a timestamp into a top-level `timestamp` field; otherwise the scripts will use current UTC.
-- Ensure your ADX table and JSON ingestion mapping exist (or are created) and that your identity has the appropriate roles (e.g., Ingestor). Refer to the directory ./adx-helpers in this repo for more information.
+- Ensure your ADX table and JSON ingestion mapping exist (or are created) and that your identity has the appropriate 
+  roles (e.g., Ingestor). Refer to the directory ./adx-helpers in this repo for more information.
 
